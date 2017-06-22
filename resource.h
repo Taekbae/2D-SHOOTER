@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by Matrices49860489.rc
+// Used by 2D_SHOOTER.rc
 //
 
 // Next default values for new objects
