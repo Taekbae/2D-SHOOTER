@@ -11,7 +11,7 @@
 typedef map<string, FMOD::Sound*> SOUNDMAP;
 
 enum SOUND {
-	BEEP_IN = 0, BEEP_OUT, SUPERBULLET,
+	BEEP_IN = 0, BEEP_OUT, SUPERBULLET, DAMAGE
 };
 
 class SoundManager
@@ -32,8 +32,8 @@ private:
 	FMOD::Channel*	schannel;
 	SOUNDMAP		soundMap;
 
-	FMOD::Sound* g_sounds[3] = { 0, }; // 효과음
-	FMOD::Channel* g_channels[3] = { 0, }; // 효과음
+	FMOD::Sound* g_sounds[4] = { 0, }; // 효과음
+	FMOD::Channel* g_channels[4] = { 0, }; // 효과음
 
 public:
 	void InitSound();	// 초기 사운드파일을 모두 로드한다.

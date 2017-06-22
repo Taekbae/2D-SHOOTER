@@ -49,6 +49,8 @@ void SoundManager::InitSound()
 	ErrorCheck(r);
 	r = system->createSound("Superbullet.mp3", FMOD_DEFAULT, NULL, &g_sounds[SUPERBULLET]);
 	ErrorCheck(r);
+	r = system->createSound("Damage.mp3", FMOD_DEFAULT, NULL, &g_sounds[DAMAGE]);
+	ErrorCheck(r);
 }
 
 void SoundManager::Update()

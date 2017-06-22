@@ -280,7 +280,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
 		if (gamemode == PLAY)
 		{
-			SOUNDMANAGER()->PlaySound("BG.ogg");
+			SOUNDMANAGER()->PlaySound("BG.mp3");
 			do_game_logic();
 			if (hero.HP == 0)
 			{
@@ -563,6 +563,7 @@ void do_game_logic(void)
 			{
 				if (bullet[i].check_collision(enemy[j].x_pos, enemy[j].y_pos) == true)
 				{
+					SOUNDMANAGER()->Play(DAMAGE);
 					enemy[j].init((float)(SCREEN_WIDTH), rand() % SCREEN_HEIGHT);
 				}
 			}
@@ -581,6 +582,7 @@ void do_game_logic(void)
 		{
 			if (superbullet.super_check_collision(enemy[j].x_pos, enemy[j].y_pos) == true)
 			{
+				SOUNDMANAGER()->Play(DAMAGE);
 				enemy[j].init((float)(SCREEN_WIDTH), rand() % SCREEN_HEIGHT);
 			}
 		}
@@ -590,7 +592,7 @@ void do_game_logic(void)
 	{
 		if (hero.check_collision(enemy[i].x_pos, enemy[i].y_pos) == true)
 		{
-			enemy[i].init((rand() % 300) + 650, rand() % 300 + 100);
+			enemy[i].init((float)(SCREEN_WIDTH), rand() % SCREEN_HEIGHT);
 			hero.HP--;
 		}
 	}
@@ -810,7 +812,7 @@ void render_frame(void)
 	case ENDING:
 	{
 		TCHAR buf[256];
-		StringCchPrintf(buf, 256, TEXT("GAME OVER\n\npress ESC to exit"));
+		StringCchPrintf(buf, 256, TEXT("GAME OVER\nYour Score:%d\n\npress ESC to exit"), score);
 		FONTMANAGER()->DescribeMainMessage(buf, 0xffffffff, 0);
 	}
 	break;
