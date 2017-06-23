@@ -611,7 +611,10 @@ void do_game_logic(void)
 				boss.HP--;
 
 				if (boss.HP < 0)
+				{
+					SOUNDMANAGER()->Play(DAMAGE);
 					boss.init(rand() % SCREEN_WIDTH + SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
+				}
 			}
 		}
 	}
@@ -638,7 +641,10 @@ void do_game_logic(void)
 			boss.HP -= 7;
 
 			if (boss.HP < 0)
+			{
+				SOUNDMANAGER()->Play(DAMAGE);
 				boss.init(rand() % SCREEN_WIDTH + SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
+			}
 		}
 	}
 
