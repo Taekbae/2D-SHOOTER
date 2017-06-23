@@ -7,7 +7,7 @@ LPDIRECT3D9 d3d;    // the pointer to our Direct3D interface
 LPDIRECT3DDEVICE9 d3ddev;    // the pointer to the device class
 LPD3DXSPRITE d3dspt;    // the pointer to our Direct3D Sprite interface
 
-						// sprite declarations
+// sprite declarations
 LPDIRECT3DTEXTURE9 sprite;    // the pointer to the sprite (Background)
 LPDIRECT3DTEXTURE9 sprite_hero;    // the pointer to the sprite (hero, animation frame 01)
 LPDIRECT3DTEXTURE9 sprite_hero_1;    // the pointer to the sprite (hero, animation frame 02)
@@ -17,11 +17,9 @@ LPDIRECT3DTEXTURE9 sprite_HP;
 LPDIRECT3DTEXTURE9 sprite_enemy;    // the pointer to the sprite (enemy)
 LPDIRECT3DTEXTURE9 sprite_bullet;    // the pointer to the sprite (bullet)
 LPDIRECT3DTEXTURE9 sprite_superBullet;    // the pointer to the sprite (superBullet)
+LPDIRECT3DTEXTURE9 sprite_boss;    // the pointer to the sprite (boss)
 
 int gamemode;
-#define INTRO 0
-#define PLAY 1
-#define ENDING 2
 
 // for scolling declarations
 RECT rct; // this will control the size of the image
@@ -29,7 +27,7 @@ int offsetx = 0;
 int offsety = 0;
 D3DXVECTOR3 Pos(0, 0, 0); // Background Pos for scrolling
 
-						  // for get score declarations
+// for get score declarations
 static int score = 0;
 wstring	strScoreMessage;
 LPCTSTR GetScore();
@@ -71,8 +69,6 @@ bool sphere_collision_check(float x0, float y0, float size0, float x1, float y1,
 class Hero :public entity {
 
 public:
-	void fire();
-	void super_fire();
 	void move(int i);
 	void init(float x, float y);
 	bool check_collision(float x, float y);
@@ -119,11 +115,30 @@ bool Hero::check_collision(float x, float y)
 	}
 }
 
+//보스 클래스 
+class Boss :public entity {
+
+public:
+	void move();
+	void init(float x, float y);
+};
+
+void Boss::init(float x, float y)
+{
+	x_pos = x;
+	y_pos = y;
+	HP = 5;
+}
+
+void Boss::move()
+{
+	x_pos -= 2;
+}
+
 // 적 클래스 
 class Enemy :public entity {
 
 public:
-	void fire();
 	void init(float x, float y);
 	void move();
 };
@@ -218,6 +233,7 @@ LPCTSTR GetScore()
 //객체 생성 
 Hero hero;
 Enemy enemy[ENEMY_NUM];
+Boss boss;
 Bullet bullet[BULLET_NUM];
 Bullet superbullet;
 
@@ -483,6 +499,21 @@ void initD3D(HWND hWnd)
 		NULL,    // not using 256 colors
 		&sprite_superBullet);    // load to sprite
 
+	D3DXCreateTextureFromFileEx(d3ddev,    // the device pointer
+		L"boss.png",    // the file name
+		150,    // default width
+		78,    // default height
+		D3DX_DEFAULT,    // no mip mapping
+		NULL,    // regular usage
+		D3DFMT_A8R8G8B8,    // 32-bit pixels with alpha
+		D3DPOOL_MANAGED,    // typical memory handling
+		D3DX_DEFAULT,    // no filtering
+		D3DX_DEFAULT,    // no mip filtering
+		D3DCOLOR_XRGB(255, 0, 255),    // the hot-pink color key
+		NULL,    // no image info struct
+		NULL,    // not using 256 colors
+		&sprite_boss);    // load to sprite
+
 	return;
 }
 
@@ -498,6 +529,8 @@ void init_game(void)
 	{
 		enemy[i].init((float)(rand() % SCREEN_WIDTH + SCREEN_WIDTH), rand() % SCREEN_HEIGHT);
 	}
+
+	boss.init(rand() % SCREEN_WIDTH + SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
 }
 
 void do_game_logic(void)
@@ -523,6 +556,11 @@ void do_game_logic(void)
 		else
 			enemy[i].move();
 	}
+
+	if (boss.x_pos < -200)
+		boss.init(750, rand() % 100);
+	else
+		boss.move();
 
 	// bullet fire
 	for (int i = 0; i < BULLET_NUM; i++)
@@ -567,6 +605,14 @@ void do_game_logic(void)
 					enemy[j].init((float)(SCREEN_WIDTH), rand() % SCREEN_HEIGHT);
 				}
 			}
+
+			if (bullet[i].check_collision(boss.x_pos, boss.y_pos) == true)
+			{
+				boss.HP--;
+
+				if (boss.HP < 0)
+					boss.init(rand() % SCREEN_WIDTH + SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
+			}
 		}
 	}
 
@@ -586,6 +632,14 @@ void do_game_logic(void)
 				enemy[j].init((float)(SCREEN_WIDTH), rand() % SCREEN_HEIGHT);
 			}
 		}
+
+		if (superbullet.check_collision(boss.x_pos, boss.y_pos) == true)
+		{
+			boss.HP -= 7;
+
+			if (boss.HP < 0)
+				boss.init(rand() % SCREEN_WIDTH + SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
+		}
 	}
 
 	for (int i = 0; i < ENEMY_NUM; i++)
@@ -595,6 +649,12 @@ void do_game_logic(void)
 			enemy[i].init((float)(SCREEN_WIDTH), rand() % SCREEN_HEIGHT);
 			hero.HP--;
 		}
+	}
+
+	if (hero.check_collision(boss.x_pos, boss.y_pos) == true)
+	{
+		boss.init(rand() % SCREEN_WIDTH + SCREEN_WIDTH, rand() % SCREEN_HEIGHT);
+		hero.HP = 0;
 	}
 }
 
@@ -646,19 +706,18 @@ void draw_background(void)
 
 	if (offsetx < 0) offsetx = SCREEN_WIDTH;
 
-	/* with keyboard input
-	if (KEY_DOWN(VK_UP))
-	offsety++;
+	// with keyboard input
+	// if (KEY_DOWN(VK_UP))
+	// offsety++;
 
-	if (KEY_DOWN(VK_DOWN))
-	offsety--;
+	// if (KEY_DOWN(VK_DOWN))
+	// offsety--;
 
 	if (KEY_DOWN(VK_LEFT))
 	offsetx++;
 
 	if (KEY_DOWN(VK_RIGHT))
 	offsetx--;
-	*/
 }
 
 // this is the function used to render a single frame
@@ -704,7 +763,7 @@ void render_frame(void)
 		offsetx -= 2;
 		draw_background();
 
-		//주인공 
+		// Hero
 		RECT part;
 		SetRect(&part, 0, 0, 64, 64);
 		D3DXVECTOR3 center(0.0f, 0.0f, 0.0f);    // center at the upper-left corner
@@ -736,7 +795,7 @@ void render_frame(void)
 			break;
 		}
 
-		////총알 
+		// Bullet
 		for (int i = 0; i < BULLET_NUM; i++)
 		{
 			if (bullet[i].bShow == true)
@@ -758,7 +817,7 @@ void render_frame(void)
 			d3dspt->Draw(sprite_superBullet, &part3, &center3, &position3, D3DCOLOR_ARGB(255, 255, 255, 255));
 		}
 
-		////에네미 
+		// Enemy
 		RECT part2;
 		SetRect(&part2, 0, 0, 100, 52);
 		D3DXVECTOR3 center2(0.0f, 0.0f, 0.0f);    // center at the upper-left corner
@@ -768,6 +827,13 @@ void render_frame(void)
 			D3DXVECTOR3 position2(enemy[i].x_pos, enemy[i].y_pos, 0.0f);    // position at 50, 50 with no depth
 			d3dspt->Draw(sprite_enemy, &part2, &center2, &position2, D3DCOLOR_ARGB(255, 255, 255, 255));
 		}
+
+		// Boss
+		RECT part7;
+		SetRect(&part7, 0, 0, 150, 78);
+		D3DXVECTOR3 center7(0.0f, 0.0f, 0.0f);    // center at the upper-left corner
+		D3DXVECTOR3 position7(boss.x_pos, boss.y_pos, 0.0f);    // position at 50, 50 with no depth
+		d3dspt->Draw(sprite_boss, &part7, &center7, &position7, D3DCOLOR_ARGB(30 * boss.HP + 105, 255, 255, 255));
 
 		// HP
 		RECT part4;
@@ -841,6 +907,7 @@ void cleanD3D(void)
 	sprite_enemy->Release();
 	sprite_bullet->Release();
 	sprite_superBullet->Release();
+	sprite_boss->Release();
 
 	return;
 }

@@ -31,7 +31,7 @@
 #pragma comment(lib, "dinput8.lib")
 #pragma message("Automatically linking : DirectX Library -> dinput8.lib")
 
-#define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS 1
+#define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS 1 // <hash_map> error
 
 #include <windows.h>
 #include <tchar.h>
@@ -62,6 +62,11 @@ using namespace FMOD;
 
 #define ENEMY_NUM 20
 #define BULLET_NUM 100
+
+// gamemode
+#define INTRO 0
+#define PLAY 1
+#define ENDING 2
 
 #include "FontManager.h"
 #include "SoundManager.h"
